@@ -43,7 +43,11 @@ images.  We will vary the PSFs and the per-pixel noise.  In typical
 ground-based images, the per-pixel noise is due primarily to the
 Poisson distribution of the sky background, which is well approximated
 by Gaussian noise; readout noise adds to this, but is usually fairly
-small in comparison.
+small in comparison.  We will assume that the images have been
+photometrically calibrated so that they are all in the same units;
+thus longer exposures would result in the same measured flux values
+but will have smaller per-pixel noise and smaller errors in the
+measured fluxes.
 
 We examine four cases, building up to the most realistic:
 \begin{itemize}
@@ -124,7 +128,7 @@ Method B has the strong advantage that each exposure is photometered
 independently, so it is computationally cheap and embarrassingly
 parallel.
 
-\section{Case 1: Same noise, same PSF}
+\section*{Case 1: Same noise, same PSF}
 
 \begin{figure}[h!]
   \begin{center}
@@ -133,7 +137,7 @@ parallel.
     \includegraphics[width=0.48\textwidth]{coadd-00}
     \includegraphics[width=0.48\textwidth]{coadd-01}
   \end{center}
-  \caption{Results for Case 1.  \textbf{Left}: the expected photometric
+  \caption{Results for Case 1 (same PSF, same per-pixel noise).  \textbf{Left}: the expected photometric
     uncertainty (error) for the different methods, as a function of
     the coadd weighting.  At the top of the plot, the two individual
     exposures, which have the same noise and PSF, have the same
@@ -153,7 +157,77 @@ parallel.
 \end{figure}
 
 
+Figure~\ref{fig:caseone} shows results for Case 1.  In this case, all
+three Methods produce exactly the same results.  Since the two images
+have the same PSF and per-pixel noise, the best coadd weight $\alpha =
+0.5$.
 
+
+\section*{Case 2: Different noise, same PSF}
+
+\begin{figure}[h!]
+  \begin{center}
+    \includegraphics[width=0.48\textwidth]{coadd-02}
+    \includegraphics[width=0.48\textwidth]{coadd-03}
+  \end{center}
+  \caption{Results for Case 2 (same PSF, different per-pixel noise).
+    \textbf{Left}: the expected photometric
+    uncertainty (error) for the different methods, as a function of
+    the coadd weighting.  Image A has half the per-pixel noise as Image B,
+    so provides photometric measurements with half the uncertainty.
+    The coadd weight that results in the best performance is $\alpha = 0.8$;
+    this corresponds to inverse-variance weighting the images.
+    \newline \textbf{Right}: Results of simulations where we
+    add noise to synthetic images and run each of the
+    photometry methods $10,000$ times.  The measured fluxes for
+    the three methods are all identical, as in Case 1.
+    \label{fig:casetwo}}
+\end{figure}
+
+In Case 2, one image has half the per-pixel noise as the other.
+Results are shown in Figure~\ref{fig:casetwo}.  In this case, again,
+each of the three Methods produce the same results.  The best coadd
+weight $\alpha$ is found to correspond to inverse-variance weighting
+of the images: Image A, with half the noise, is given a weight four
+times greater than that of Image B.
+
+
+
+\section*{Case 3: Same noise, different PSF}
+
+\begin{figure}[h!]
+  \begin{center}
+    \includegraphics[width=0.48\textwidth]{coadd-04}
+    \includegraphics[width=0.48\textwidth]{coadd-05}
+  \end{center}
+  \caption{Results for Case 3 (same per-pixel noise, different PSF).
+    \textbf{Left}: the expected photometric uncertainty (error) for
+    the different methods, as a function of the coadd weighting.
+    Image A has half the seeing size as Image B, and provides
+    photometric measurements with half the uncertainty.  The coadd
+    weight that results in the best performance is $\alpha \sim 0.7$.
+    Even with the best coadd weight, the coadd method perform slightly
+    worse than the other methods.  Since the majority of the
+    signal-to-noise is carried by Image A, the difference is quite
+    small.
+    \newline \textbf{Right}: Results of simulations where we add noise
+    to synthetic images and run each of the photometry methods
+    $10,000$ times.  The measured fluxes for the three methods are as
+    predicted: Methods A and B (simultaneous fitting or catalog-level
+    averaging) still perform exactly the same, but Method C, coadding,
+    performs slightly worse.
+    \label{fig:casethree}}
+\end{figure}
+
+In Case 3, one image has half the seeing size (full-width at half-max)
+as the other.  Results are shown in Figure~\ref{fig:casethree}.
+Here, the coadding method performs slightly worse than the other methods.
+
+
+
+
+
+\section*{xxx}
 
 
 In this experiment, I am looking at four cases of doing forced photometry on two images:

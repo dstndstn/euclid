@@ -24,7 +24,7 @@ plt.subplots_adjust(left=0.15, bottom=0.15, right=0.97, top=0.99)
 
 H,W = 50,50
 trueflux = 100.
-Nruns = 10000
+Nruns = 1000
 
 for name,imageset in [
         ('Case 1: Same noise and PSF', [(1., 2.), (1., 2.)]),
@@ -133,13 +133,16 @@ for name,imageset in [
     bestamp = coadd_amps[i]
     print('Best coadd amplitude:', bestamp)
 
+    stys = [dict(color='b', linestyle='dashed'),
+            dict(color='b', linestyle='dotted'),]
+    
     plt.clf()
     plt.xlabel('Coadd weight $\\alpha$')
     plt.ylabel('Error in photometry')
-    for err,(noise,seeing) in zip(indiv_errs, imageset):
-        plt.axhline(err, label=('Individual exposure: noise %.1f, seeing %.1f' %
-                                (noise,seeing)),
-                    zorder=18)
+    for i,(err,(noise,seeing),sty) in enumerate(zip(indiv_errs, imageset, stys)):
+        plt.axhline(err, label=('Image %s: noise %.1f, seeing %.1f' %
+                                (chr(ord('A')+i), noise,seeing)),
+                    zorder=18, **sty)
     plt.plot(coadd_amps, errors, 'g-', label='Method C: Coadd',
              zorder=22, lw=3, alpha=0.5)
     plt.axhline(total_indiv_errs, color='k', lw=5, alpha=0.3,
@@ -161,6 +164,8 @@ for name,imageset in [
 
     orig_data = [tim.data for tim in tims]
 
+    all_fluxes = np.zeros((Nruns, len(tims)))
+    
     print('Simulating', Nruns, 'times...')
     for irun in range(Nruns):
         # Add a new random noise draw to each image
@@ -182,11 +187,14 @@ for name,imageset in [
             tr.freezeParam('images')
             src.brightness.setParams([0.])
             phot = tr.optimize_forced_photometry(variance=True)
-            fluxes[itim] = src.getBrightness().getValue()
+            f = src.getBrightness().getValue()
+            fluxes[itim] = f
             fluxes_iv[itim] = phot.IV[0]
 
-        fluxes_indiv.extend(list(fluxes))
+            all_fluxes[irun,itim] = f
 
+        fluxes_indiv.extend(list(fluxes))
+        
         # Weighted sum of individual exposures (weighted by inverse-variance)
         fluxes_summed.append((np.sum(fluxes * fluxes_iv) / np.sum(fluxes_iv)))
 
@@ -221,9 +229,22 @@ for name,imageset in [
     plt.clf()
     ha = dict(histtype='step', range=(80, 120), bins=40, normed=True)
 
-    plt.hist(fluxes_indiv, color='b',
-             label=('Individual exposures: std %.2f, S/N %.2f' % 
-                    (np.std(fluxes_indiv), trueflux / np.std(fluxes_indiv))), **ha)
+    # plt.hist(fluxes_indiv, color='b',
+    #          label=('Individual exposures: std %.2f, S/N %.2f' % 
+    #                 (np.std(fluxes_indiv), trueflux / np.std(fluxes_indiv))), **ha)
+
+    #for i in range(len(tims)):
+    f = all_fluxes[:,0]
+    ha2 = ha.copy()
+    ha2.update(stys[0])
+    plt.hist(f, label='Image A: std %.2f, S/N %.2f' % (np.std(f), trueflux / np.std(f)),
+             **ha2)
+    f = all_fluxes[:,1]
+    ha2 = ha.copy()
+    ha2.update(stys[1])
+    plt.hist(f, label='Image B: std %.2f, S/N %.2f' % (np.std(f), trueflux / np.std(f)),
+             **ha2)
+    
     plt.hist(fluxes_simult, color='r',
              label=('[A] Simultaneous fitting: std %.2f, S/N %.2f' %
                     (np.std(fluxes_simult), trueflux / np.std(fluxes_simult))), lw=3, **ha)
