@@ -1,10 +1,17 @@
 from __future__ import print_function
+import matplotlib
+matplotlib.use('Agg')
+matplotlib.rc('text', usetex=True)
+matplotlib.rc('font', family='serif')
 import numpy as np
 import pylab as plt
 from astrometry.util.plotutils import PlotSequence
 import tractor
 
-ps = PlotSequence('coadd')
+ps = PlotSequence('coadd', suffix='pdf')
+
+plt.figure(figsize=(4,3))
+plt.subplots_adjust(left=0.15, bottom=0.15, right=0.97, top=0.99)
 
 # Case 1: coadd two images with same noise and PSF -- same performance as individual exposures
 # Case 2: different noise, same PSF
@@ -17,6 +24,7 @@ ps = PlotSequence('coadd')
 
 H,W = 50,50
 trueflux = 100.
+Nruns = 10000
 
 for name,imageset in [
         ('Case 1: Same noise and PSF', [(1., 2.), (1., 2.)]),
@@ -126,28 +134,25 @@ for name,imageset in [
     print('Best coadd amplitude:', bestamp)
 
     plt.clf()
-    plt.xlabel('Coadd weight')
-    plt.ylabel('Forced-photometry uncertainty')
+    plt.xlabel('Coadd weight $\\alpha$')
+    plt.ylabel('Error in photometry')
     for err,(noise,seeing) in zip(indiv_errs, imageset):
         plt.axhline(err, label=('Individual exposure: noise %.1f, seeing %.1f' %
                                 (noise,seeing)),
                     zorder=18)
-    plt.plot(coadd_amps, errors, 'g-', label='Coadd',
-             zorder=22)
+    plt.plot(coadd_amps, errors, 'g-', label='Method C: Coadd',
+             zorder=22, lw=3, alpha=0.5)
     plt.axhline(total_indiv_errs, color='k', lw=5, alpha=0.3,
-                label='Weighted sum of individual measurements',
+                label='Method B: Single-frame average',
                 zorder=20,
         )
-    plt.axhline(simult_err, color='r', label='Simultaneous fitting',
+    plt.axhline(simult_err, color='r', label='Method A: Simultaneous fitting',
                 zorder=21)
     l = plt.legend(loc='center right')
     l.set_zorder(30)
-    plt.title(name)
+    #plt.title(name)
     plt.xlim(0,1)
     ps.savefig()
-    
-
-    Nruns = 10000
 
     fluxes_simult = []
     fluxes_indiv = []
@@ -214,25 +219,26 @@ for name,imageset in [
         fluxes_coadd.append(src.getBrightness().getValue())
 
     plt.clf()
-    ha = dict(histtype='step', range=(80, 120), bins=25, normed=True)
+    ha = dict(histtype='step', range=(80, 120), bins=40, normed=True)
 
     plt.hist(fluxes_indiv, color='b',
              label=('Individual exposures: std %.2f, S/N %.2f' % 
                     (np.std(fluxes_indiv), trueflux / np.std(fluxes_indiv))), **ha)
     plt.hist(fluxes_simult, color='r',
-             label=('Simultaneous fitting: std %.2f, S/N %.2f' %
+             label=('[A] Simultaneous fitting: std %.2f, S/N %.2f' %
                     (np.std(fluxes_simult), trueflux / np.std(fluxes_simult))), lw=3, **ha)
     plt.hist(fluxes_summed, color='k',
-             label=('Weighted sum of individual exposures: std %.2f, S/N %.2f' %
+             label=('[B] Single-frame average: std %.2f, S/N %.2f' %
                     (np.std(fluxes_summed), trueflux / np.std(fluxes_summed))), **ha)
     plt.hist(fluxes_coadd, color='g',
-             label=('Coadded exposures: std %.2f, S/N %.2f' %
+             label=('[C] Coadded: std %.2f, S/N %.2f' %
                     (np.std(fluxes_coadd), trueflux / np.std(fluxes_coadd))), **ha)
     plt.xlabel('Measured flux')
+    plt.ylabel('Frequency')
     plt.title(name)
     plt.legend(loc='upper right')
     yl,yh = plt.ylim()
-    plt.ylim(yl, yh*1.4)
+    plt.ylim(yl, yh*1.5)
     plt.xlim(80,120)
     ps.savefig()
     

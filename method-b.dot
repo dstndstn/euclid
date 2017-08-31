@@ -1,0 +1,22 @@
+digraph {
+margin = 0;
+node [ shape="rectangle" ];
+#edge [ dir="back" ];
+
+subgraph images {
+a [ label="Image A" ];
+b [ label="Image B" ];
+};
+
+fluxa [ label="Flux A" ];
+fluxb [ label="Flux B" ];
+
+flux [ label="Avg Flux" ];
+
+a -> fluxa;
+b -> fluxb;
+
+fluxa -> flux;
+fluxb -> flux;
+
+}

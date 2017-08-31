@@ -1,0 +1,20 @@
+digraph {
+margin = 0;
+node [ shape="rectangle" ];
+#edge [ dir="back" ];
+
+subgraph images {
+a [ label="Image A" ];
+b [ label="Image B" ];
+};
+
+img [ label="Coadd" ];
+
+flux [ label="Flux" ];
+
+a -> img;
+b -> img;
+
+img -> flux;
+
+}
