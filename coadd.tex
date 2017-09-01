@@ -28,7 +28,8 @@ and uses the \code{Tractor} code\footnote{%
 The main question to be answered in this experiment is how much
 signal-to-noise is lost (how much extra error is introduced) when
 images are coadded before performing photometry, as compared to
-performing photometry on single exposures.
+performing photometry on single exposures and averaging the results at
+``catalog level''.
 
 This experiment assumes we are doing forced photometry on two
 ground-based images.  That is, it assumes that we have a high-quality
@@ -66,20 +67,18 @@ photometry methods.  In all cases, we are doing model-based forced
 photometry: we are fitting for the flux where our pixel-space image
 model best matches the observed pixels, given the per-pixel noise in
 the images.
-% This saturates the Cram\'er--Rao bound, meaning that it
-% extracts all the available information in the images.
 \begin{itemize}
-  \item \textbf{Method A: Simultaneous fitting}: We do a single fit
+  \item \textbf{Simultaneous fitting}: We do a single fit
     for the flux that produces the best match to both images at the
     same time.  That is, we are finding the flux that produces the
     smallest sum of chi-squared differences between the model and the
     images, summing the chi-squared of both images.
-  \item \textbf{Method B: Single-frame average}: We fit for the flux
+  \item \textbf{Single-frame averaging}: We fit for the flux
     in each image independently, and then compute a weighted average
     of the fluxes.  That is, we compute a best-fit flux for each
     image, and then average the flux measurements in ``catalog
     space''.
-  \item \textbf{Method C: Coadding}: We add together the pixels of the
+  \item \textbf{Coadding}: We add together the pixels of the
     two images (with weights), and then fit for the flux that best
     matches the coadded image.  When doing the fit, we compute the
     correct PSF model for the coadded images.  We test different
@@ -90,11 +89,11 @@ the images.
 \begin{figure}[h!]
   \begin{center}
     \begin{tabular}{*{3}{c}}
-      Method A
+      Simultaneous Fitting
       &
-      Method B
+      Single-Frame Averaging
       &
-      Method C
+      Coadding
       \\
       \adjustimage{width=0.2\textwidth,valign=T}{method-a}
       &
@@ -104,28 +103,30 @@ the images.
       \\
     \end{tabular}
   \end{center}
-  \caption{ Schematics of the three photometry methods presented in
-    this report.  Method A is simultaneous fitting: the flux is
+  \caption{Schematics of the three photometry methods presented in
+    this report.  In \emph{Simultaneous Fitting}, the flux is
     optimized to minimize the sum of chi-squared values between the
-    model and data, summed over both images.  Method B measures a flux
-    for each image (by minimizing chi-squared in the single image),
-    then averages the two flux measurements.  Method C computes a
-    coadd (averages the images), then fits a flux to the coadd.
+    model and data, summed over both images.  In \emph{Single-Frame
+      Averaging}, we measure a flux for each image (by minimizing
+    chi-squared in the single image), then weighted-average the two
+    flux measurements.  In \emph{Coadding}, we compute a coadd
+    (average the images), then fit a flux to the coadd.
     \label{fig:methods}
   }
 \end{figure}
 
-Note that Method A, simultaneous fitting, saturates the Cram\'er--Rao
-bound, meaning that it extracts all the available information in the
-images.  It is the most expensive in terms of computation time and
-memory; it requires that all the images to be measured are in memory
-at once.  We include it in this experiment only for comparison; one of
-the results of this report is that Method B always performs exactly
-the same.  This is because the flux measurements are sufficient
-statistics and are distributed as Gaussians, so they can be combined
-at ``catalog level'' with simple equations and no loss of information.
-Method B has the strong advantage that each exposure is photometered
-independently, so it is computationally cheap and embarrassingly
+Note that the first method, Simultaneous Fitting, saturates the
+Cram\'er--Rao bound, meaning that it extracts all the available
+information in the images.  It is the most expensive in terms of
+computation time and memory; it requires that all the images to be
+measured are in memory at once.  We include it in this experiment only
+for comparison; one of the results of this report is that Single-Frame
+Averaging always performs exactly the same.  This is because the flux
+measurements are sufficient statistics and are distributed as
+Gaussians, so they can be combined at ``catalog level'' with simple
+equations and no loss of information.  Single-Frame Averaging has the
+strong advantage that each exposure is photometered independently, so
+it is computationally cheap, can be distributed, and is embarrassingly
 parallel.
 
 \newpage
@@ -160,7 +161,7 @@ parallel.
 
 
 Figure~\ref{fig:caseone} shows results for Case 1.  In this case, all
-three Methods produce exactly the same results.  Since the two images
+three methods produce exactly the same results.  Since the two images
 have the same PSF and per-pixel noise, the best coadd weight $\alpha =
 0.5$.
 
@@ -189,7 +190,7 @@ have the same PSF and per-pixel noise, the best coadd weight $\alpha =
 
 In Case 2, one image has half the per-pixel noise as the other.
 Results are shown in Figure~\ref{fig:casetwo}.  In this case, again,
-each of the three Methods produce the same results.  The best coadd
+each of the three methods produce the same results.  The best coadd
 weight $\alpha$ is found to correspond to inverse-variance weighting
 of the images: Image A, with half the noise, is given a weight four
 times greater than that of Image B.
@@ -216,9 +217,8 @@ times greater than that of Image B.
     \newline \textbf{Right}: Results of simulations where we add noise
     to synthetic images and run each of the photometry methods
     $10,000$ times.  The measured fluxes for the three methods are as
-    predicted: Methods A and B (simultaneous fitting or catalog-level
-    averaging) still perform exactly the same, but Method C, coadding,
-    performs slightly worse.
+    predicted: Simultaneous Fitting and Single-Frame Averaging still
+    perform exactly the same, but Coadding performs slightly worse.
     \label{fig:casethree}}
 \end{figure}
 
@@ -230,8 +230,8 @@ detection requires the use of a ``matched filter''---convolution by
 the correct PSF---but in the coadded image, the two images with
 different PSFs have been mixed together.  In other words, the matched
 filters for the two images would place different relative weights on
-the pixels; the the PSF of the coadd places intermediate weights on
-the pixels, so is less than optimal for both images.
+the pixels; the PSF of the coadd places intermediate weights on
+the pixels, so is less than optimal for both input images.
 
 \newpage
 
@@ -256,9 +256,8 @@ the pixels, so is less than optimal for both images.
     \newline \textbf{Right}: Results of simulations where we add noise
     to synthetic images and run each of the photometry methods
     $10,000$ times.  The measured fluxes for the three methods are as
-    predicted: Methods A and B (simultaneous fitting or catalog-level
-    averaging) still perform exactly the same, but Method C, coadding,
-    performs worse.
+    predicted: Simultaneous Fitting and Single-Frame Averaging
+    still perform exactly the same, but Coadding performs worse.
     \label{fig:casefour}}
 \end{figure}
 
@@ -271,76 +270,36 @@ depth.  The results for Case 4 are shown in Figure~\ref{fig:casefour}.
 In this case, the coadd method produces significantly worse results.
 Perhaps surprisingly, the best coadd weight $\alpha$ is not
 $0.5$---equal weighting for the equally-sensitive images---but is
-roughly $1/3$.  The loss of signal-to-noise is roughly $8\%$, which
-may not seem like much, but observing time goes with signal-to-noise
-squared, so this corresponds to more than a $16\%$ increase in
-required observing time.
+roughly $1/3$.  The loss of signal-to-noise from using the Coadding
+method is roughly $5\%$, which may not seem like much, but observing
+time goes with signal-to-noise squared, so this corresponds to more
+than a $10\%$ increase in required observing time.
 
 
-\section*{xxx}
+\newpage
+\section*{Conclusions}
 
+These experiments show that for the realistic case of different PSFs
+and different per-pixel noise levels in ground-based images, creating
+a coadd and then photometering it results in a significant ($5\%$)
+less of signal-to-noise, or more than $10\%$ increase in required
+telescope time.  On the other hand, performing photometry on
+individual exposures and then computing weighted averages at ``catalog
+level'' is shown to exactly match the signal-to-noise performance of
+simultaneous fitting, and saturates the Cram\'er--Rao bound (that is,
+extracts all available information).
 
-In this experiment, I am looking at four cases of doing forced photometry on two images:
+Photometering individual exposures also has the programmatic advantage
+that it is highly distributed: each input image is processed
+independently, and updating the final photometric measurement when a
+new images is taken is simple and fast.  A broader advantage is that
+per-exposure information (such as spatially-varying filter response)
+can be tagged on to single-exposure measurements and incorporated into
+more advanced downstream processing, in which one would not summarize
+the single-exposure measurements with a catalog-level average, but
+instead forward-model the single-exposure measurements.
 
-Case 1: same noise, same PSF
-Case 2: different noise, same PSF
-Case 3: same noise, different PSF
-Case 4: different noise, different PSF, but same per-image S/N
-
-For each case, I have two plots:
-- the first plot shows, as a function of the weighting used when adding the two images together (weight * image1 + (1-weight) * image2), what uncertainty you would get when doing force photometry on the coadd (smaller is better).
-
-- the second plots shows histograms from running 10,000 rounds of drawing random noise, adding it to images, and running the different photometry methods.  Here, a tight distribution in flux values (narrower Gaussian) is better.
-
-The photometry methods I'm showing are:
-1. individual exposures, one at a time.
-2. weighted-sum of the individual exposures (inverse-variance weighting)
-3. simultaneous fitting of individual exposures.
-4. create a coadd, and then photometer the coadd.
-
-All the plots show that methods (2) and (3) perform exactly the same.  This is totally expected for Gaussian noise.
-
-Looking at the four cases:
-
-Case 1, where the noise and PSF are the same, shows that coadding with equal weights results in no loss of signal-to-noise, as you would expect.
-
-Case 2 shows that when the noise levels differ but the PSF is the same, the best coadd weight is different than 50/50; it's 80/20 in this example -- it's an inverse-variance weighting.  With the optimal coadd weight, the performance of the coadd matches the performance of individual exposures.  This is also exactly as expected.
-
-Case 3 shows that when the PSFs are different, the best coadd weight is some intermediate value, and, as we wanted to show, the best signal-to-noise you can deliver from a coadd is worse than you get from photometering the individual exposures.  In this case the loss of signal-to-noise is not very large because one of the images carries a lot more signal than the other, so no matter what you do the worse image doesn't add much.
-
-Case 4 is really the punch line.  Here the PSFs are different, but the signal-to-noises in the two images are roughly equal.  This would happen in a survey with adaptive exposure times, where you expose for longer (or take more exposures) when the seeing is worse.  The two images contribute similar amounts of signal-to-noise, but their PSFs are quite different, so creating a coadd destroys information.
-
-Even so, the amount of information lost is not that big -- S/N difference of about 5\%, or a 10\% difference in telescope time.  For CFIS and similar surveys that is a significant number of nights :)  But a factor of two in seeing values is probably extreme...
-
-
-I would be very happy to get your comments on how to improve these experiments, plots, or explanation to best communicate this result to the group.
-
-cheers,
---dustin
-
-
-
-In your introduction you might want to frame this as simplified baby steps up to the reality case (case 4) which is the one that should dictate the final decision purely from a SNR consideration (then there is the filter response which is yet another, as strong, argument towards single frame photometry).
-
-For:
-
-1. individual exposures, one at a time.
-2. weighted-sum of the individual exposures (inverse-variance weighting)
-3. simultaneous fitting of individual exposures.
-4. create a coadd, and then photometer the coadd.
-
--> in 2 you mean building the SNR out of the catalogs, a catalog coadd, (worth making this explicit since as written it evocates a bit some sort of image coadd).
-
--> Also for clarity of your text, rename that second batch of conditions a/b/c/d as you refer to 1/2/3/4 from above just below that paragraph.
-
-For you plot, seeing 2.0 vs 1.0, I understand it is just a scaling factor (not 1" vs 2" in absolute?), this is worth mentioning, specially since sampling effect will likely start having an impact at some point (your study ignores a pixel grid I guess?).
-
-Regarding the conclusion, a factor of 2 in IQ is what we get in CFIS-r actually, max limit is 0.9 but we have quite a few images <0.45". The SNR per exposure being however derived for a point source in a 2" diameter aperture, it is the sky background that influences most the SNR per exposure, here a factor of ~two is part of the plan (dark vs grey sky as defined for MegaCam, you are likely to have a greater range on DECam considering your airmass right?).
-
-You have a wealth of stats from DECaLS on your dynamic integration in your three bands, if you want to add a practical illustration of your point? And you are absolutely right in pointing out 5 to 10% difference in observing time matters a lot. Considering how we scaled our ground surveys "how bad can they be while still enabling the photo-z?", any gain is good - Marc Sauvage is very receptive to this sort of statement.
-
-Great punch line/conclusion for sure!
-
-Jean-Charles.
+The code for this experiment is freely available.\footnote{%
+  \niceurl{https://github.com/dstndstn/euclid/}}
 
 \end{document}
