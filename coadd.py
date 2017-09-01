@@ -24,7 +24,7 @@ plt.subplots_adjust(left=0.15, bottom=0.15, right=0.97, top=0.99)
 
 H,W = 50,50
 trueflux = 100.
-Nruns = 1000
+Nruns = 10000
 
 for name,imageset in [
         ('Case 1: Same noise and PSF', [(1., 2.), (1., 2.)]),

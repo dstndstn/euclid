@@ -128,9 +128,11 @@ Method B has the strong advantage that each exposure is photometered
 independently, so it is computationally cheap and embarrassingly
 parallel.
 
+\newpage
+
 \section*{Case 1: Same noise, same PSF}
 
-\begin{figure}[h!]
+\begin{figure}[b!]
   \begin{center}
     %\begin{tabular}{cc}
     %\end{tabular}
@@ -162,10 +164,11 @@ three Methods produce exactly the same results.  Since the two images
 have the same PSF and per-pixel noise, the best coadd weight $\alpha =
 0.5$.
 
+\newpage
 
 \section*{Case 2: Different noise, same PSF}
 
-\begin{figure}[h!]
+\begin{figure}[b!]
   \begin{center}
     \includegraphics[width=0.48\textwidth]{coadd-02}
     \includegraphics[width=0.48\textwidth]{coadd-03}
@@ -191,11 +194,11 @@ weight $\alpha$ is found to correspond to inverse-variance weighting
 of the images: Image A, with half the noise, is given a weight four
 times greater than that of Image B.
 
-
+\newpage
 
 \section*{Case 3: Same noise, different PSF}
 
-\begin{figure}[h!]
+\begin{figure}[b!]
   \begin{center}
     \includegraphics[width=0.48\textwidth]{coadd-04}
     \includegraphics[width=0.48\textwidth]{coadd-05}
@@ -219,12 +222,59 @@ times greater than that of Image B.
     \label{fig:casethree}}
 \end{figure}
 
-In Case 3, one image has half the seeing size (full-width at half-max)
-as the other.  Results are shown in Figure~\ref{fig:casethree}.
-Here, the coadding method performs slightly worse than the other methods.
+In Case 3, one image has half the seeing size (full-width at half-max,
+FWHM) as the other.  Results are shown in Figure~\ref{fig:casethree}.
+Here, the coadding method performs slightly worse than the other
+methods.  This can be explained by the fact that optimal source
+detection requires the use of a ``matched filter''---convolution by
+the correct PSF---but in the coadded image, the two images with
+different PSFs have been mixed together.  In other words, the matched
+filters for the two images would place different relative weights on
+the pixels; the the PSF of the coadd places intermediate weights on
+the pixels, so is less than optimal for both images.
 
+\newpage
 
+\section*{Case 4: Different noise, different PSF}
 
+\begin{figure}[b!]
+  \begin{center}
+    \includegraphics[width=0.48\textwidth]{coadd-06}
+    \includegraphics[width=0.48\textwidth]{coadd-07}
+  \end{center}
+  \caption{Results for Case 4 (different per-pixel noise, different
+    PSF, same signal-to-noise).  \textbf{Left}: the expected
+    photometric uncertainty (error) for the different methods, as a
+    function of the coadd weighting.  Image A has half the seeing size
+    as Image B, but more per-pixel noise, and thus provides
+    photometric measurements with approximately equal uncertainty.
+    (The signal-to-noise values are not exactly equal due to the
+    effects of detector pixelization.)  The coadd weight that results
+    in the best performance is $\alpha \sim 0.33$.  Even with the best
+    coadd weight, the coadd method perform significantly worse than the
+    other methods.
+    \newline \textbf{Right}: Results of simulations where we add noise
+    to synthetic images and run each of the photometry methods
+    $10,000$ times.  The measured fluxes for the three methods are as
+    predicted: Methods A and B (simultaneous fitting or catalog-level
+    averaging) still perform exactly the same, but Method C, coadding,
+    performs worse.
+    \label{fig:casefour}}
+\end{figure}
+
+In Case 4, one image has half the seeing size (FWHM) as the other, but
+the second image has half as much noise.  As such, the images are
+equally sensitive.  This is a realistic case because many ground-based
+surveys will take longer exposures (leading to less per-pixel noise)
+when the seeing is worse, in order to produce a survey of uniform
+depth.  The results for Case 4 are shown in Figure~\ref{fig:casefour}.
+In this case, the coadd method produces significantly worse results.
+Perhaps surprisingly, the best coadd weight $\alpha$ is not
+$0.5$---equal weighting for the equally-sensitive images---but is
+roughly $1/3$.  The loss of signal-to-noise is roughly $8\%$, which
+may not seem like much, but observing time goes with signal-to-noise
+squared, so this corresponds to more than a $16\%$ increase in
+required observing time.
 
 
 \section*{xxx}
