@@ -1,4 +1,4 @@
-\documentclass[letter,11pt]{article}
+\documentclass[a4paper,11pt]{article}
 
 \usepackage{fullpage}
 \usepackage{hyperref}
@@ -13,8 +13,8 @@
 \newcommand{\code}[1]{\textsl{#1}}
 
 \author{Dustin Lang}
-\date{Aug 22, 2017}
-\title{Evaluation of coadded and single-frame photometry methods}
+\date{2017--09--08}
+\title{Evaluation of coadding and single-frame photometry methods}
 
 \begin{document}
 \maketitle
@@ -25,11 +25,12 @@ methods.  The script for these experiments is publicly
 available\footnote{%
   \niceurl{https://github.com/dstndstn/euclid/blob/master/coadd.py}}
 and uses the \code{Tractor} code\footnote{%
-  \niceurl{https://github.com/dstndstn/tractor}} to generate synthetic images.
+  \niceurl{https://github.com/dstndstn/tractor}} to generate synthetic images
+and photometer them.
 
 The main question to be answered in this experiment is how much
-signal-to-noise is lost (how much extra error is introduced) when
-images are coadded before performing photometry, as compared to
+signal-to-noise is lost (how much extra photometric error is introduced) when
+individual exposures are coadded before performing photometry, as compared to
 performing photometry on single exposures and averaging the results at
 ``catalog level''.
 
@@ -48,7 +49,7 @@ Poisson distribution of the sky background, which is well approximated
 by Gaussian noise; readout noise adds to this, but is usually fairly
 small in comparison.  We will assume that the images have been
 photometrically calibrated so that they are all in the same units;
-thus longer exposures would result in the same measured flux values
+thus longer exposures will result in the same measured flux values
 but will have smaller per-pixel noise and smaller errors in the
 measured fluxes.
 
@@ -69,6 +70,8 @@ photometry methods.  In all cases, we are doing model-based forced
 photometry: we are fitting for the flux where our pixel-space image
 model best matches the observed pixels, given the per-pixel noise in
 the images.
+
+The methods are:
 \begin{itemize}
   \item \textbf{Simultaneous fitting}: We do a single fit
     for the flux that produces the best match to both images at the
@@ -133,7 +136,19 @@ parallel.
 
 \newpage
 
-\section*{Case 1: Same noise, same PSF}
+\section{Results}
+
+For each of the four cases, we perform two analyses.  In the first
+analysis, we compute the expected signal-to-noise performance of the
+different methods.  Since the Coadding method has a parameter
+$\alpha$, we evaluate the performance at all different parameter
+values.  In the second analysis, we produce simulated images, and then
+run $10,000$ trials where we add random Gaussian noise to the two
+images and run each of the three photometry methods.  We then show the
+distributions of measured fluxes, to confirm that they indeed match
+the analytically predicted performance.
+
+\subsection*{Case 1: Same noise, same PSF}
 
 \begin{figure}[b!]
   \begin{center}
@@ -144,12 +159,13 @@ parallel.
   \end{center}
   \caption{Results for Case 1 (same PSF, same per-pixel noise).  \textbf{Left}: the expected photometric
     uncertainty (error) for the different methods, as a function of
-    the coadd weighting.  At the top of the plot, the two individual
-    exposures, which have the same noise and PSF, have the same
+    the coadd weighting.  (Smaller is better.)  At the top of the plot, the two individual
+    exposures, which have the same noise and PSF, give the same
     photometric error.  When the coadd weight is $\alpha = 0$ or $1$,
     the error in the coadd photometry equals that of the individual
     images.  With $\alpha = 0.5$, the coadd method performs as well as
-    the other two methods.
+    the other two methods, which produce errors that are a factor of
+    $\sqrt{2}$ smaller than the individual exposures.
     \newline \textbf{Right}: Results of simulations
     adding noise to synthetic images and running each of the
     photometry methods.  The measured fluxes are shown for $10,000$
@@ -169,7 +185,7 @@ have the same PSF and per-pixel noise, the best coadd weight $\alpha =
 
 \newpage
 
-\section*{Case 2: Different noise, same PSF}
+\subsection*{Case 2: Different noise, same PSF}
 
 \begin{figure}[b!]
   \begin{center}
@@ -199,7 +215,7 @@ times greater than that of Image B.
 
 \newpage
 
-\section*{Case 3: Same noise, different PSF}
+\subsection*{Case 3: Same noise, different PSF}
 
 \begin{figure}[b!]
   \begin{center}
@@ -237,7 +253,7 @@ the pixels, so is less than optimal for both input images.
 
 \newpage
 
-\section*{Case 4: Different noise, different PSF}
+\subsection*{Case 4: Different noise, different PSF}
 
 \begin{figure}[b!]
   \begin{center}
@@ -281,15 +297,15 @@ than a $10\%$ increase in required observing time.
 \newpage
 \section*{Conclusions}
 
-These experiments show that for the realistic case of different PSFs
-and different per-pixel noise levels in ground-based images, creating
-a coadd and then photometering it results in a significant ($5\%$)
-less of signal-to-noise, or more than $10\%$ increase in required
-telescope time.  On the other hand, performing photometry on
-individual exposures and then computing weighted averages at ``catalog
-level'' is shown to exactly match the signal-to-noise performance of
-simultaneous fitting, and saturates the Cram\'er--Rao bound (that is,
-extracts all available information).
+These experiments show that for the realistic case (Case 4) of
+different PSFs and different per-pixel noise levels in ground-based
+images, creating a coadd and then photometering it results in a
+significant ($5\%$) loss of signal-to-noise, or more than $10\%$
+increase in required telescope time.  On the other hand, performing
+photometry on individual exposures and then computing weighted
+averages at ``catalog level'' is shown to exactly match the
+signal-to-noise performance of simultaneous fitting, and saturates the
+Cram\'er--Rao bound (that is, extracts all available information).
 
 Photometering individual exposures also has the programmatic advantage
 that it is highly distributed: each input image is processed
