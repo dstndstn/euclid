@@ -12,8 +12,11 @@
 \newcommand{\niceurl}[1]{\href{#1}{\textsl{#1}}}
 \newcommand{\code}[1]{\textsl{#1}}
 
-\author{Dustin Lang}
-\date{2017--09--08}
+\author{Dustin Lang \\
+  \small Department of Astronomy \& Astrophysics and Dunlap Institute \\
+  \small University of Toronto \\
+  \href{mailto:dstndstn@gmail.com}{\small \textsl{dstndstn@gmail.com}}}
+\date{2017--10--04}
 \title{Evaluation of coadding and single-frame photometry methods}
 
 \begin{document}
@@ -34,29 +37,30 @@ individual exposures are coadded before performing photometry, as compared to
 performing photometry on single exposures and averaging the results at
 ``catalog level''.
 
-This experiment assumes we are doing forced photometry on two
+This experiment assumes we are doing \emph{forced photometry} on two
 ground-based images.  That is, it assumes that we have a high-quality
 catalog (eg, from Euclid VIS) in which we have detected a single point
-source.  It assumes that we have correctly calibrated the astrometry
-of the ground-based images, so we know exactly where in pixel
-coordinates the point source will be found; and it also assumes that
-we have a correct point-spread function (PSF) model for each image.
-It assumes the two image were taken with the same bandpass filter, and
-asks how well we can measure the flux of the point source in the
-images.  We will vary the PSFs and the per-pixel noise.  In typical
+source, and we wish to measure the flux of that source in the
+ground-based images.  It assumes that we have correctly calibrated the
+astrometry of the ground-based images, so we know exactly where the
+point source will be found in pixel coordinates; and it also assumes
+that we have a correct point-spread function (PSF) model for each
+image.  It assumes the two image were taken with the same bandpass
+filter.  We will vary the PSFs and the per-pixel noise.  In typical
 ground-based images, the per-pixel noise is due primarily to the
 Poisson distribution of the sky background, which is well approximated
 by Gaussian noise; readout noise adds to this, but is usually fairly
 small in comparison.  We will assume that the images have been
 photometrically calibrated so that they are all in the same units;
-thus longer exposures will result in the same measured flux values
-but will have smaller per-pixel noise and smaller errors in the
-measured fluxes.
+thus longer exposures will result in the same measured flux values but
+will have smaller per-pixel noise and smaller errors in the measured
+fluxes.  Finally, we will assume that the images are pixel-aligned, so
+that no resampling is necessary.
 
 We examine four cases, building up to the most realistic:
 \begin{itemize}
 \item \textbf{Case 1}: the two images have the same per-pixel noise,
-  and the same PSF
+  and the same point-spread function (PSF)
 \item \textbf{Case 2}: the two images have different levels of
   per-pixel noise, but the same PSF
 \item \textbf{Case 3}: the two images have the same per-pixel noise
@@ -64,6 +68,8 @@ We examine four cases, building up to the most realistic:
 \item \textbf{Case 4}: the two images have different per-pixel noise
   and PSF (but the same per-image signal-to-noise).
 \end{itemize}
+Case 4 represents what we expect to get from the Euclid ground-based
+imaging surveys.
 
 For each of these four cases, we show results for three different
 photometry methods.  In all cases, we are doing model-based forced
@@ -140,13 +146,13 @@ parallel.
 
 For each of the four cases, we perform two analyses.  In the first
 analysis, we compute the expected signal-to-noise performance of the
-different methods.  Since the Coadding method has a parameter
-$\alpha$, we evaluate the performance at all different parameter
-values.  In the second analysis, we produce simulated images, and then
-run $10,000$ trials where we add random Gaussian noise to the two
-images and run each of the three photometry methods.  We then show the
-distributions of measured fluxes, to confirm that they indeed match
-the analytically predicted performance.
+different methods, analytically.  Since the Coadding method has a
+parameter $\alpha$, we evaluate the performance at all different
+parameter values.  In the second analysis, we produce simulated
+images, and then run $10,000$ trials where we add random Gaussian
+noise to the two images and run each of the three photometry methods.
+We then show the distributions of measured fluxes, to confirm that
+they indeed match the analytically predicted performance.
 
 \subsection*{Case 1: Same noise, same PSF}
 
@@ -166,14 +172,15 @@ the analytically predicted performance.
     images.  With $\alpha = 0.5$, the coadd method performs as well as
     the other two methods, which produce errors that are a factor of
     $\sqrt{2}$ smaller than the individual exposures.
-    \newline \textbf{Right}: Results of simulations
-    adding noise to synthetic images and running each of the
-    photometry methods.  The measured fluxes are shown for $10,000$
-    trials.  In this Case, the flux measurements on the individual
-    exposures have a standard deviation of about 7, while all three
-    of the other methods produce exactly the same results, with a standard
-    deviation $1/\sqrt{2}$ as large; roughly 5.  Note that these results are
-    entirely consistent with the analytically-computed expected performance values.
+    \newline \textbf{Right}: Results of simulations adding noise to
+    synthetic images and running each of the photometry methods.  The
+    measured fluxes are shown for $10,000$ trials.  In this Case, the
+    flux measurements on the individual exposures have a standard
+    deviation of about 7, and all three of the photometry methods
+    produce exactly the same results, with a standard deviation
+    $1/\sqrt{2}$ as large; roughly 5.  Note that these results are
+    entirely consistent with the analytically-computed expected
+    performance values.
     \label{fig:caseone}}
 \end{figure}
 
@@ -243,13 +250,29 @@ times greater than that of Image B.
 In Case 3, one image has half the seeing size (full-width at half-max,
 FWHM) as the other.  Results are shown in Figure~\ref{fig:casethree}.
 Here, the coadding method performs slightly worse than the other
-methods.  This can be explained by the fact that optimal source
-detection requires the use of a ``matched filter''---convolution by
-the correct PSF---but in the coadded image, the two images with
-different PSFs have been mixed together.  In other words, the matched
-filters for the two images would place different relative weights on
-the pixels; the PSF of the coadd places intermediate weights on
-the pixels, so is less than optimal for both input images.
+methods; it produces noisier results.
+%
+This loss can be understood by considering which pixels carry the
+information in the two images.  The first image, with good seeing---a
+small PSF---has most of the star's flux in the central few pixels; the
+outer pixels have little effect on the measured flux.  The second
+image, with worse seeing---a broad PSF---has the star's flux spread
+out over many pixels; relatively little information is contained in
+the central few pixels.  In effect, when coadded, the second image
+contributes noise but little signal in the central pixels, so degrades
+the information carried by the first image in the central pixels.
+Meanwhile, in the outer pixels, the first image contributes noise but
+little signal, degrading the information carried by the second image.
+
+
+The loss of signal-to-noise in the coadding method is related to the
+fact that optimal source detection requires the use of a ``matched
+filter''---convolution by the correct PSF---but in the coadded image,
+the two images with different PSFs have been mixed together.  In other
+words, the matched filters for the two images would place different
+relative weights on the pixels; the PSF of the coadd places
+intermediate weights on the pixels, so is less than optimal for both
+input images.
 
 \newpage
 
@@ -310,12 +333,26 @@ Cram\'er--Rao bound (that is, extracts all available information).
 Photometering individual exposures also has the programmatic advantage
 that it is highly distributed: each input image is processed
 independently, and updating the final photometric measurement when a
-new images is taken is simple and fast.  A broader advantage is that
-per-exposure information (such as spatially-varying filter response)
-can be tagged on to single-exposure measurements and incorporated into
-more advanced downstream processing, in which one would not summarize
-the single-exposure measurements with a catalog-level average, but
-instead forward-model the single-exposure measurements.
+new image is taken is simple and fast.
+
+In the case of Euclid, adopting forced photometry of individual
+exposures would mean that the large ground-based imaging survey pixel
+data (which are larger than the space-based VIS imaging) would not
+need to be transported.  Instead, only the Euclid VIS
+\emph{catalog}---positions and shapes of the stars and galaxies to be
+measured---would need to be sent to where the ground-based images are
+held.  Only the forced-photometry flux measurements would then need to
+be returned to the Euclid ground segment for catalog-level averaging
+or more advanced downstream processing.
+
+A broader advantage of performing forced photometry on individual
+exposures is that per-exposure information (such as spatially-varying
+filter response) can be tagged on to single-exposure measurements and
+incorporated into more advanced downstream processing (eg,
+\mbox{photo-z} estimation), in which one would not simply average the
+catalog-level single-exposure measurements, but instead forward-model
+them to make use of auxiliary information.
+
 
 The code for this experiment is freely available.\footnote{%
   \niceurl{https://github.com/dstndstn/euclid/}}
